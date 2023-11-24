@@ -1,0 +1,78 @@
+# version: '3.8'
+
+# services:
+#   backend:
+#     image: openjdk:17-jdk-alpine
+#     #restart: always
+#     command: java -jar /app/app.jar
+#     ports:
+#       - "8080:8080"
+#     networks:
+#       - project_network  # Connecter le conteneur au réseau personnalisé
+#     environment:
+#       SPRING_PROFILES_ACTIVE: docker
+
+#   mysql-container:
+#     image: mysql:latest
+#     #restart: always
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#       MYSQL_DATABASE: testdb
+#     volumes:
+#       - mysqlvol_docker:/var/lib/mysql
+#     networks:
+#       - project_network  # Connecter le conteneur au réseau personnalisé
+
+#   frontend:
+#     image: nginx:latest
+#     #restart: always
+#     ports:
+#       - "80:80"
+#     networks:
+#       - project_network  # Connecter le conteneur au réseau personnalisé
+
+# networks:
+#   project_network:
+#     driver: bridge  # Spécifier le driver du réseau personnalisé
+
+#----------------------------------------------------------
+
+version: '3.8'
+
+services:
+  backend:
+    image: cobrlt/backend:1.0.0
+    container_name: backend
+    ports:
+      - "8080:8080"
+    networks:
+      - project_network
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  mysql-container:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testdb
+    volumes:
+      - mysqlvol_docker:/var/lib/mysql
+    networks:
+      - project_network
+
+  frontend:
+    image: cobrlt/frontend:1.0.0
+    container_name: frontend
+    ports:
+      - "80:80"
+    networks:
+      - project_network
+
+networks:
+  project_network:
+    name: project_network
+    driver: bridge
+
+volumes:
+  mysqlvol_docker:
