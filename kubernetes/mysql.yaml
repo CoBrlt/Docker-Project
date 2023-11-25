@@ -1,15 +1,16 @@
+# Secret pour stocker le mot de passe de la base de données
 apiVersion: v1
-kind: Secret 
-metadata: 
-  name: mysql-secret 
-data: 
-  password: cm9vdAo=
+kind: Secret
+metadata:
+  name: mysql-secret
+data:
+  password: cm9vdAo=  # Mot de passe encodé en base64
 ---
+# Service exposant la base de données
 apiVersion: v1
 kind: Service
 metadata:
   name: database-service
-  #namespace: exam
 spec:
   selector:
     app: database
@@ -17,46 +18,70 @@ spec:
     - protocol: TCP
       port: 3306
       targetPort: 3306
-  #type: ClusterIP
+
 ---
+# PersistentVolumeClaim pour stocker les données de la base de données
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysqlvol-docker
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi  # Taille du volume de stockage
+---
+# StatefulSet pour la base de données MySQL
 apiVersion: apps/v1
-kind: StatefulSet 
-metadata: 
-  name: mysql-statefulset 
-spec: 
-  replicas: 2 
-  serviceName: mysql 
-  selector: 
-    matchLabels: 
-      app: mysql 
-  template: 
-    metadata: 
-      labels: 
-        app: mysql 
-    spec: 
-      terminationGracePeriodSeconds: 10 
-      containers: 
-        - name: mysql-container 
+kind: StatefulSet
+metadata:
+  name: mysql-statefulset
+spec:
+  replicas: 2
+  serviceName: mysql
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mysql-container
           image: mysql:latest
-          ports: 
-            - containerPort: 3306 
-              name: db-port 
-          env: 
-            - name: MYSQL_ROOT_PASSWORD 
-              valueFrom: 
-                secretKeyRef: 
-                  name: mysql-secret 
+          ports:
+            - containerPort: 3306
+              name: db-port
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
                   key: password
             - name: MYSQL_DATABASE
               value: testdb
- volumeMounts: 
-            - name: mysqlvol_docker 
-              mountPath: /var/lib/mysql
-  volumeClaimTemplates: 
-    - metadata: 
-        name: mysqlvol_docker 
-      spec: 
-        accessModes: ["ReadWriteOnce"] 
-        resources: 
-          requests: 
-                  storage: 100Mi
+          # -------------------------
+          # Décommentez et ajustez les sondes selon vos besoins
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 15
+          # startupProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   failureThreshold: 30
+          #   periodSeconds: 10
+          # -------------------------
+          # volumeMounts:
+          #   - name: mysqlvol-docker
+          #     mountPath: /var/lib/mysql  # Chemin de montage pour le volume
+
