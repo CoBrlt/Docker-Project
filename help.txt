@@ -1,0 +1,236 @@
+Donc mon objectif c'est de réussir avec mon service backend (spring boot) à relier à mon service mysql, je vais te donner des infos :
+ci dessous les différents composants mes pods mysql fonctionnent très bien, mais le backend crash. 
+
+NAME                 READY   UP-TO-DATE   AVAILABLE   AGE
+backend-deployment   0/2     2            0           22m
+---------------------------------------------------------------------------------------
+NAME                READY   AGE
+mysql-statefulset   2/2     24h
+---------------------------------------------------------------------------------------
+NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+backend-service    ClusterIP   10.98.102.45   <none>        8080/TCP   22m
+database-service   ClusterIP   10.110.33.60   <none>        3306/TCP   24h
+---------------------------------------------------------------------------------------
+NAME                                  READY   STATUS             RESTARTS      AGE
+backend-deployment-7d6cc95bd9-d9zp6   0/1     CrashLoopBackOff   9 (16s ago)   22m
+backend-deployment-7d6cc95bd9-znwdr   0/1     CrashLoopBackOff   9 (34s ago)   22m
+mysql-statefulset-0                   1/1     Running            1 (24m ago)   24h
+mysql-statefulset-1                   1/1     Running            1 (24m ago)   24h
+
+ensuite j'ai pour mon application spring boot deux fichiers: application.properties :
+spring.datasource.url=jdbc:mysql://localhost:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username=root
+spring.datasource.password=root
+
+spring.jpa.properties.hibernate.dialect= org.hibernate.dialect.MySQLDialect
+spring.jpa.hibernate.ddl-auto= update
+
+
+et application-kub.properties :
+spring.datasource.url=jdbc:mysql://${HOST_NAME_DATABASE}:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username=${USERNAME_DB}
+spring.datasource.password=${PASSWORD_DB}
+
+spring.jpa.properties.hibernate.dialect= org.hibernate.dialect.MySQLDialect
+spring.jpa.hibernate.ddl-auto= update
+
+
+si j'ai c'est deux fichiers, c'est parce que pour compiler et avoir mon fichier jar ne local, j'utilise application.properties ensuite quand je met dans un conteneur je spécifie dans l'environnement que j'utilise le profil "kub"
+
+ensuite, voici mon fichier mysql.yaml que j'utilise pour kubernetes :
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+data:
+  password: cm9vdAo=  # echo root | base64
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  selector:
+    app: database
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-statefulset
+spec:
+  replicas: 2
+  serviceName: mysql
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mysql-container
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+              name: db-port
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+            - name: MYSQL_DATABASE
+              value: testdb
+          volumeMounts:
+            - name: mysqlvol-docker
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mysqlvol-docker
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+          # -------------------------
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 15
+          # startupProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   failureThreshold: 30
+          #   periodSeconds: 10
+          # -------------------------
+
+
+
+et le fichier backend.yaml :
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+data:
+  password: cm9vdAo=  # echo root | base64
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  selector:
+    app: database
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-statefulset
+spec:
+  replicas: 2
+  serviceName: mysql
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mysql-container
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+              name: db-port
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+            - name: MYSQL_DATABASE
+              value: testdb
+          volumeMounts:
+            - name: mysqlvol-docker
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mysqlvol-docker
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+          # -------------------------
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 15
+          # startupProbe:
+          #   tcpSocket:
+          #     port: 3306
+          #   failureThreshold: 30
+          #   periodSeconds: 10
+          # -------------------------
+
+
+
+et je travail dans le namespace "exam"
+
+la commande : kubectl logs -f backend-deployment-7d6cc95bd9-d9zp6 -c backend -n exam
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.1.0)
+
+2023-12-01T13:50:32.711Z  INFO 1 --- [           main] c.b.s.d.SpringBootDataJpaApplication     : Starting SpringBootDataJpaApplication v0.0.1-SNAPSHOT using Java 17-ea with PID 1 (/app/app.jar started by root in /app)
+2023-12-01T13:50:32.712Z  INFO 1 --- [           main] c.b.s.d.SpringBootDataJpaApplication     : The following 1 profile is active: "kub"
+2023-12-01T13:50:33.109Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-12-01T13:50:33.137Z  INFO 1 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 23 ms. Found 1 JPA repository interfaces.
+2023-12-01T13:50:33.466Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2023-12-01T13:50:33.472Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2023-12-01T13:50:33.473Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.8]
+2023-12-01T13:50:33.525Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2023-12-01T13:50:33.526Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 771 ms
+2023-12-01T13:50:33.732Z  INFO 1 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-12-01T13:50:33.758Z  INFO 1 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.2.Final
+2023-12-01T13:50:33.759Z  INFO 1 --- [           main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-12-01T13:50:33.836Z  INFO 1 --- [           main] o.h.b.i.BytecodeProviderInitiator        : HHH000021: Bytecode provider name : bytebuddy
+2023-12-01T13:50:33.913Z  INFO 1 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-12-01T13:50:33.922Z  INFO 1 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-12-01T13:50:34.982Z ERROR 1 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Exception during pool initialization.
+
+com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
