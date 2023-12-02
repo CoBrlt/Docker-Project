@@ -3,14 +3,13 @@ kind: ConfigMap
 metadata: 
   name: app-conf 
 data: 
-  profil: docker
+  profil: kub
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
-  #namespace: exam
 spec:
   selector:
     app: backend
@@ -18,8 +17,6 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-  #type: ClusterIP
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -43,11 +40,28 @@ spec:
             - containerPort: 8080
               name : backend-port
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              valueFrom:
-                configMapKeyRef:
-                  name: app-conf
-                  key: profil
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://database-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root
+          
+            # - name: SPRING_PROFILES_ACTIVE
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: app-conf
+            #       key: profil
+            # - name: HOST_NAME_DATABASE
+            #   value: "database-service"
+            # - name: USERNAME_DB
+            #   value: "root"
+            # - name: PASSWORD_DB
+            #   value: "root"
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mysql-secret
+              #     key: password
           #-------------------------
           # readinessProbe:
           #   httpGet:

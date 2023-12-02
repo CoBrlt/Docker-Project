@@ -1,0 +1,1 @@
+kubectl apply -f backend.yaml -n=exam
