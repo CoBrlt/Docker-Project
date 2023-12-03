@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tutorial } from '../models/tutorial.model';
-import { environment } from '../config';
+//import { environment } from '../config';
+// import { Injectable } from '@angular/core';
+// import { environment } from '../../environments/environment';
 
-const baseUrl = 'http://localhost:8080/api/tutorials';
+const baseUrl = 'http://10.111.138.176:8080/api/tutorials';
 //je dois mettre localhost parce qu'avec le nom du conteneur backend, angular n'arrive pas à se connecter
 //je pourrai mettre l'adresse ip du conteneur backend mais elle change
 

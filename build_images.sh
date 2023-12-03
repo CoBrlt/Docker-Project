@@ -21,7 +21,12 @@ cd ../angular-16-crud-example-master/
 npm run build
 sleep 5s
 
-docker build -t cobrlt/frontend:1.0.0 .
+docker build  --no-cache -t cobrlt/frontend:1.0.0 .
 
 docker stop mysql-container
 docker rm mysql-container
+
+docker login -u cobrlt -p corentincorentin
+
+#docker push cobrlt/backend:1.0.0
+docker push cobrlt/frontend:1.0.0

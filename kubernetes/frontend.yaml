@@ -33,12 +33,13 @@ spec:
       containers:
         - name: frontend
           image: cobrlt/frontend:1.0.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http-port
-          env:
-            - name: CUSTOM_BACKEND_URL
-              value: http://backend-service:8080/api/tutorials
+          # env:
+          #   - name: CUSTOM_BACKEND_URL
+          #     value: http://backend-service:8080/api/tutorials
           #-------------------------    
           # readinessProbe:
           #   httpGet:
