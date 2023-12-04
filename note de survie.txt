@@ -1,0 +1,11 @@
+j’ai fais:
+minikube delete
+minikube start
+minikube addons enable ingress
+minikube ip -> mis l’ip dans /etc/hosts
+kubectl create namespace exam
+sh mysql.sh
+sh backend.sh
+sh frontend.sh
+j’ai attendu que tout démarre
+kubectl apply -f ingress.yaml -n exam

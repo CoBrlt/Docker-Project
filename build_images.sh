@@ -18,7 +18,7 @@ docker build -t cobrlt/backend:1.0.0 .
 
 
 cd ../angular-16-crud-example-master/
-npm run build
+sudo npm run build
 sleep 5s
 
 docker build  --no-cache -t cobrlt/frontend:1.0.0 .
