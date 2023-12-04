@@ -39,6 +39,13 @@ spec:
           ports:
             - containerPort: 8080
               name : backend-port
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://database-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true

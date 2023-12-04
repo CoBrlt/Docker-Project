@@ -37,6 +37,13 @@ spec:
           ports:
             - containerPort: 80
               name: http-port
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           # env:
           #   - name: CUSTOM_BACKEND_URL
           #     value: http://backend-service:8080/api/tutorials

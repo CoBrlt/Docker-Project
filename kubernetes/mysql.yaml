@@ -50,6 +50,13 @@ spec:
               #     key: password
             - name: MYSQL_DATABASE
               value: testdb
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "100m"
+            limits:
+              memory: "500Mi"
+              cpu: "300m"
           volumeMounts:
             - name: mysqlvol-docker
               mountPath: /var/lib/mysql
