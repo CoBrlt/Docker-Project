@@ -4,6 +4,8 @@ metadata:
   name: app-conf 
 data: 
   profil: kub
+  database: database-service
+  username-db: root
 
 ---
 apiVersion: v1
@@ -65,26 +67,30 @@ spec:
             failureThreshold: 30
             periodSeconds: 10
           env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://database-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
-            - name: SPRING_DATASOURCE_USERNAME
-              value: root
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: root
-          
-            # - name: SPRING_PROFILES_ACTIVE
-            #   valueFrom:
-            #     configMapKeyRef:
-            #       name: app-conf
-            #       key: profil
-            # - name: HOST_NAME_DATABASE
-            #   value: "database-service"
-            # - name: USERNAME_DB
-            #   value: "root"
-            # - name: PASSWORD_DB
-            #   value: "root"
-              # valueFrom:
-              #   secretKeyRef:
-              #     name: mysql-secret
-              #     key: password
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-conf
+                  key: profil
+            - name: HOST_NAME_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-conf
+                  key: database
+            - name: USERNAME_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-conf
+                  key: username-db
+            - name: PASSWORD_DB
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
 
+            # - name: SPRING_DATASOURCE_URL
+            #   value: jdbc:mysql://database-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
+            # - name: SPRING_DATASOURCE_USERNAME
+            #   value: root
+            # - name: SPRING_DATASOURCE_PASSWORD
+            #   value: root
