@@ -50,6 +50,21 @@ spec:
               #     key: password
             - name: MYSQL_DATABASE
               value: testdb
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          startupProbe:
+            tcpSocket:
+              port: 3306
+            failureThreshold: 30
+            periodSeconds: 10
           resources:
             requests:
               memory: "250Mi"
@@ -68,21 +83,4 @@ spec:
         resources:
           requests:
             storage: 1Gi
-          # -------------------------
-          # readinessProbe:
-          #   tcpSocket:
-          #     port: 3306
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 10
-          # livenessProbe:
-          #   tcpSocket:
-          #     port: 3306
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 15
-          # startupProbe:
-          #   tcpSocket:
-          #     port: 3306
-          #   failureThreshold: 30
-          #   periodSeconds: 10
-          # -------------------------
 

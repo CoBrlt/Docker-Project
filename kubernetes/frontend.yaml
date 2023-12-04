@@ -44,26 +44,25 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          startupProbe:
+            httpGet:
+              path: /
+              port: 80
+            failureThreshold: 30
+            periodSeconds: 10
           # env:
           #   - name: CUSTOM_BACKEND_URL
           #     value: http://backend-service:8080/api/tutorials
-          #-------------------------    
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 80
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 10
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 80
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 15
-          # startupProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 80
-          #   failureThreshold: 30
-          #   periodSeconds: 10
 

@@ -46,6 +46,24 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /api/tutorials
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/tutorials
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          startupProbe:
+            httpGet:
+              path: /api/tutorials
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 10
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://database-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
@@ -69,23 +87,4 @@ spec:
               #   secretKeyRef:
               #     name: mysql-secret
               #     key: password
-          #-------------------------
-          # readinessProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: 8080
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 10
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: 8080
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 15
-          # startupProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: 8080
-          #   failureThreshold: 30
-          #   periodSeconds: 10
 
