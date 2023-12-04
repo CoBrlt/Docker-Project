@@ -1,25 +1,25 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: my-role
   namespace: exam
+  name: readonly-role
 rules:
 - apiGroups: [""]
-  resources: ["pods", "services", "deployments"]  # Ajoutez les ressources que vous souhaitez autoriser
-  verbs: ["get", "list", "watch", "create", "update", "delete"]
+  resources: ["*"]
+  verbs: ["get", "list"]
 
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: my-role-binding
   namespace: exam
+  name: readonly-role-binding
 subjects:
 - kind: User
-  name: "utilisateur@example.com"  # Remplacez par le nom de l'utilisateur
+  name: readonly-user
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: my-role
+  name: readonly-role
   apiGroup: rbac.authorization.k8s.io
