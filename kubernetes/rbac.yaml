@@ -1,25 +1,26 @@
+# Déclaration d'un rôle (Role) pour définir des autorisations d'accès en lecture seule (readonly)
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: exam
-  name: readonly-role
+  namespace: exam  # Espace de noms dans lequel le rôle est créé
+  name: readonly-role  # Nom du rôle
 rules:
 - apiGroups: [""]
-  resources: ["*"]
-  verbs: ["get", "list"]
+  resources: ["*"]  # Toutes les ressources
+  verbs: ["get", "list"]  # Autorisations pour les opérations "get" et "list"
 
+# Déclaration d'une liaison de rôle (RoleBinding) pour attacher le rôle readonly à un utilisateur
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  namespace: exam
-  name: readonly-role-binding
+  namespace: exam  # Espace de noms dans lequel la liaison de rôle est créée
+  name: readonly-role-binding  # Nom de la liaison de rôle
 subjects:
 - kind: User
-  name: readonly-user
+  name: readonly-user  # Nom de l'utilisateur associé au rôle readonly
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: readonly-role
+  name: readonly-role  # Référence au rôle readonly
   apiGroup: rbac.authorization.k8s.io

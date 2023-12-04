@@ -1,24 +1,25 @@
+# Déclaration d'une ressource Ingress pour gérer l'accès externe aux services
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app-ingress
+  name: app-ingress  # Nom de la ressource Ingress
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx  # Nom de la classe Ingress utilisée (par exemple, pour le contrôleur NGINX)
   rules:
-  - host: exam-aseds-ine2.com
+  - host: exam-aseds-ine2.com  # Règle basée sur le nom d'hôte
     http:
       paths:
-      - path: /api/
-        pathType: Prefix
+      - path: /api/  # Chemin d'accès pour le backend
+        pathType: Prefix  # Type de chemin (préfixe)
         backend:
           service:
-            name: backend-service
+            name: backend-service  # Nom du service backend
             port:
-              number: 8080
-      - path: /
-        pathType: Prefix
+              number: 8080  # Numéro du port du service backend
+      - path: /  # Chemin d'accès par défaut pour le frontend
+        pathType: Prefix  # Type de chemin (préfixe)
         backend:
           service:
-            name: frontend-service
+            name: frontend-service  # Nom du service frontend
             port:
-              number: 80
+              number: 80  # Numéro du port du service frontend

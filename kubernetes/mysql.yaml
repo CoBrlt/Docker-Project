@@ -1,36 +1,39 @@
+# Déclaration d'un secret
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mysql-secret
+  name: mysql-secret  # Nom du secret
 type: Opaque
 data:
-  password: cm9vdA==
-  #password: cm9vdA==  # echo root | base64
----
+  password: cm9vdA==  # Mot de passe encodé en base64 (exemple : echo root | base64)
+  #password: cm9vdA==  # (commenté) Utilisation de la même valeur que ci-dessus, mais déjà commentée
 
+# Déclaration d'un service
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: database-service
+  name: database-service  # Nom du service
 spec:
   selector:
-    app: mysql
+    app: mysql  # Sélection des pods avec l'étiquette 'app: mysql'
   ports:
     - protocol: TCP
       port: 3306
       targetPort: 3306
 
+# Déploiement d'une application MySQL en tant que StatefulSet
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mysql-statefulset
+  name: mysql-statefulset  # Nom de l'ensemble d'États
 spec:
-  replicas: 2
-  serviceName: mysql
+  replicas: 2  # Deux répliques (pods) de l'application MySQL
+  serviceName: mysql  # Nom du service associé
   selector:
     matchLabels:
-      app: mysql
+      app: mysql  # Sélection des pods avec l'étiquette 'app: mysql'
   template:
     metadata:
       labels:
@@ -39,44 +42,46 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: mysql-container
-          image: mysql:latest
+          image: mysql:latest  # Image Docker utilisée pour le conteneur MySQL
           ports:
             - containerPort: 3306
-              name: db-port
+              name: db-port  # Nom du port du conteneur
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: root
+              value: root  # Mot de passe root de MySQL
               # valueFrom:
               #   secretKeyRef:
               #     name: mysql-secret
               #     key: password
             - name: MYSQL_DATABASE
-              value: testdb
+              value: testdb  # Nom de la base de données MySQL
           readinessProbe:
             tcpSocket:
-              port: 3306
-            initialDelaySeconds: 5
-            periodSeconds: 10
+              port: 3306  # Port pour la sonde de disponibilité
+            initialDelaySeconds: 5  # Délai initial avant de commencer la sonde de disponibilité
+            periodSeconds: 10  # Fréquence de vérification de la sonde de disponibilité
           livenessProbe:
             tcpSocket:
-              port: 3306
-            initialDelaySeconds: 10
-            periodSeconds: 15
+              port: 3306  # Port pour la sonde de vivacité
+            initialDelaySeconds: 10  # Délai initial avant de commencer la sonde de vivacité
+            periodSeconds: 15  # Fréquence de vérification de la sonde de vivacité
           startupProbe:
             tcpSocket:
-              port: 3306
-            failureThreshold: 30
-            periodSeconds: 10
+              port: 3306  # Port pour la sonde de démarrage
+            failureThreshold: 30  # Nombre d'échecs successifs requis pour signaler un échec de démarrage
+            periodSeconds: 10  # Fréquence de vérification de la sonde de démarrage
           resources:
             requests:
-              memory: "250Mi"
-              cpu: "100m"
+              memory: "250Mi"  # Demande de mémoire pour le conteneur
+              cpu: "100m"  # Demande de CPU pour le conteneur
             limits:
-              memory: "500Mi"
-              cpu: "300m"
+              memory: "500Mi"  # Limite de mémoire pour le conteneur
+              cpu: "300m"  # Limite de CPU pour le conteneur
           volumeMounts:
             - name: mysqlvol-docker
-              mountPath: /var/lib/mysql
+              mountPath: /var/lib/mysql  # Chemin de montage pour le stockage MySQL
+
+  # Déclaration du modèle de revendication de volume pour MySQL
   volumeClaimTemplates:
     - metadata:
         name: mysqlvol-docker
@@ -84,5 +89,4 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1Gi
-
+            storage: 1Gi  # Taille demandée pour le stockage

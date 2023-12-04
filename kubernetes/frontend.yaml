@@ -1,30 +1,33 @@
+# Déclaration d'un service
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
-  namespace: exam
+  name: frontend-service  # Nom du service
+  namespace: exam  # Espace de noms dans lequel le service est créé
 spec:
   selector:
-    app: frontend
+    app: frontend  # Sélection des pods avec l'étiquette 'app: frontend'
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
   #     nodePort: 31000
   # type: NodePort
+  # (commenté) Le port NodePort peut être décommenté si un accès externe est nécessaire
 
 
+# Déploiement d'une application
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
-  namespace: exam
+  name: frontend-deployment  # Nom du déploiement
+  namespace: exam  # Espace de noms dans lequel le déploiement est créé
 spec:
-  replicas: 2
+  replicas: 2  # Deux répliques (pods) de l'application
   selector:
     matchLabels:
-      app: frontend
+      app: frontend  # Sélection des pods avec l'étiquette 'app: frontend'
   template:
     metadata:
       labels:
@@ -32,37 +35,39 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: cobrlt/frontend:1.0.0
-          imagePullPolicy: Always
+          image: cobrlt/frontend:1.0.0  # Image Docker utilisée pour le conteneur
+          imagePullPolicy: Always  # Toujours tirer l'image même si elle existe localement
           ports:
             - containerPort: 80
-              name: http-port
+              name: http-port  # Nom du port du conteneur
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "256Mi"  # Demande de mémoire pour le conteneur
+              cpu: "250m"  # Demande de CPU pour le conteneur
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "512Mi"  # Limite de mémoire pour le conteneur
+              cpu: "500m"  # Limite de CPU pour le conteneur
+          # Sonde de disponibilité (readinessProbe)
           readinessProbe:
             httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 10
+              path: /  # Chemin pour la sonde de disponibilité
+              port: 80  # Port pour la sonde de disponibilité
+            initialDelaySeconds: 5  # Délai initial avant de commencer la sonde de disponibilité
+            periodSeconds: 10  # Fréquence de vérification de la sonde de disponibilité
+          # Sonde de vivacité (livenessProbe)
           livenessProbe:
             httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 15
+              path: /  # Chemin pour la sonde de vivacité
+              port: 80  # Port pour la sonde de vivacité
+            initialDelaySeconds: 10  # Délai initial avant de commencer la sonde de vivacité
+            periodSeconds: 15  # Fréquence de vérification de la sonde de vivacité
+          # Sonde de démarrage (startupProbe)
           startupProbe:
             httpGet:
-              path: /
-              port: 80
-            failureThreshold: 30
-            periodSeconds: 10
+              path: /  # Chemin pour la sonde de démarrage
+              port: 80  # Port pour la sonde de démarrage
+            failureThreshold: 30  # Nombre d'échecs successifs requis pour signaler un échec de démarrage
+            periodSeconds: 10  # Fréquence de vérification de la sonde de démarrage
           env:
             - name: CUSTOM_BACKEND_URL
-              value: http://exam-aseds-ine2.com/api/tutorials
-
+              value: http://exam-aseds-ine2.com/api/tutorials  # Variable d'environnement pour l'URL du backend

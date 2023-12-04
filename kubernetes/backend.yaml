@@ -1,35 +1,39 @@
-apiVersion: v1 
-kind: ConfigMap 
-metadata: 
-  name: app-conf 
-data: 
-  profil: kub
-  database: database-service
-  username-db: root
+# Configuration de la ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-conf  # Nom de la ConfigMap
+data:
+  profil: kub  # Clé 'profil' avec la valeur 'kub'
+  database: database-service  # Clé 'database' avec la valeur 'database-service'
+  username-db: root  # Clé 'username-db' avec la valeur 'root'
 
+# Déclaration d'un service
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: backend-service  # Nom du service
 spec:
   selector:
-    app: backend
+    app: backend  # Sélection des pods avec l'étiquette 'app: backend'
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
+
+# Déploiement d'une application
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-deployment
-  #namespace: exam
+  name: backend-deployment  # Nom du déploiement
+  #namespace: exam  # (commenté) Namespace dans lequel le déploiement est créé
 spec:
-  replicas: 2
+  replicas: 2  # Deux répliques (pods) de l'application
   selector:
     matchLabels:
-      app: backend
+      app: backend  # Sélection des pods avec l'étiquette 'app: backend'
   template:
     metadata:
       labels:
@@ -37,57 +41,57 @@ spec:
     spec:
       containers:
         - name: backend
-          image: cobrlt/backend:1.0.0
+          image: cobrlt/backend:1.0.0  # Image Docker utilisée pour le conteneur
           ports:
             - containerPort: 8080
-              name : backend-port
+              name: backend-port  # Nom du port du conteneur
           resources:
             requests:
-              memory: "200Mi"
-              cpu: "200m"
+              memory: "200Mi"  # Demande de mémoire pour le conteneur
+              cpu: "200m"  # Demande de CPU pour le conteneur
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "512Mi"  # Limite de mémoire pour le conteneur
+              cpu: "500m"  # Limite de CPU pour le conteneur
           readinessProbe:
             httpGet:
               path: /api/tutorials
               port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 5  # Délai initial avant de commencer la sonde de disponibilité
+            periodSeconds: 10  # Fréquence de vérification de la sonde de disponibilité
           livenessProbe:
             httpGet:
               path: /api/tutorials
               port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 15
+            initialDelaySeconds: 10  # Délai initial avant de commencer la sonde de vivacité
+            periodSeconds: 15  # Fréquence de vérification de la sonde de vivacité
           startupProbe:
             httpGet:
               path: /api/tutorials
               port: 8080
-            failureThreshold: 30
-            periodSeconds: 10
+            failureThreshold: 30  # Nombre d'échecs successifs requis pour signaler un échec de démarrage
+            periodSeconds: 10  # Fréquence de vérification de la sonde de démarrage
           env:
             - name: SPRING_PROFILES_ACTIVE
               valueFrom:
                 configMapKeyRef:
                   name: app-conf
-                  key: profil
+                  key: profil  # Utilisation de la clé 'profil' de la ConfigMap pour définir une variable d'environnement
             - name: HOST_NAME_DATABASE
               valueFrom:
                 configMapKeyRef:
                   name: app-conf
-                  key: database
+                  key: database  # Utilisation de la clé 'database' de la ConfigMap pour définir une variable d'environnement
             - name: USERNAME_DB
               valueFrom:
                 configMapKeyRef:
                   name: app-conf
-                  key: username-db
+                  key: username-db  # Utilisation de la clé 'username-db' de la ConfigMap pour définir une variable d'environnement
             - name: PASSWORD_DB
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: password
-
+                  key: password  # Utilisation de la clé 'password' d'un secret pour définir une variable d'environnement
+            # Les lignes suivantes sont commentées
             # - name: SPRING_DATASOURCE_URL
             #   value: jdbc:mysql://database-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true
             # - name: SPRING_DATASOURCE_USERNAME
