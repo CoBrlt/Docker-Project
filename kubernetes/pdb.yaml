@@ -1,36 +1,39 @@
+# Définition d'un PodDisruptionBudget (PDB) pour le frontend dans l'espace de noms "exam"
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: frontend-pdb
-  namespace: exam
+  name: frontend-pdb  # Nom du PDB
+  namespace: exam    # Espace de noms du PDB
 spec:
-  minAvailable: 1  # Nombre minimal de pods disponibles pendant une perturbation
+  minAvailable: 1     # Garantit qu'au moins 1 pod est disponible pendant les perturbations
   selector:
     matchLabels:
-      app: frontend  # Étiquette correspondant à votre application
+      app: frontend   # Sélectionne les pods avec l'étiquette "app: frontend"
 
 ---
 
+# Définition d'un PodDisruptionBudget (PDB) pour le backend dans l'espace de noms "exam"
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: backend-pdb
-  namespace: exam
+  name: backend-pdb   # Nom du PDB
+  namespace: exam     # Espace de noms du PDB
 spec:
-  minAvailable: 1  # Nombre minimal de pods disponibles pendant une perturbation
+  minAvailable: 1     # Garantit qu'au moins 1 pod est disponible pendant les perturbations
   selector:
     matchLabels:
-      app: backend
+      app: backend    # Sélectionne les pods avec l'étiquette "app: backend"
 
 ---
 
+# Définition d'un PodDisruptionBudget (PDB) pour MySQL dans l'espace de noms "exam"
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: mysql-pdb
-  namespace: exam
+  name: mysql-pdb     # Nom du PDB
+  namespace: exam     # Espace de noms du PDB
 spec:
-  minAvailable: 1  # Nombre minimal de pods disponibles pendant une perturbation
+  minAvailable: 1     # Garantit qu'au moins 1 pod est disponible pendant les perturbations
   selector:
     matchLabels:
-      app: mysql
+      app: mysql      # Sélectionne les pods avec l'étiquette "app: mysql"

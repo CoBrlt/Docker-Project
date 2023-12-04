@@ -62,7 +62,7 @@ spec:
               port: 80
             failureThreshold: 30
             periodSeconds: 10
-          # env:
-          #   - name: CUSTOM_BACKEND_URL
-          #     value: http://backend-service:8080/api/tutorials
+          env:
+            - name: CUSTOM_BACKEND_URL
+              value: http://exam-aseds-ine2.com/api/tutorials
 
